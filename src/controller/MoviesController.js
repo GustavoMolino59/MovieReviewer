@@ -46,7 +46,6 @@ class MoviesController{
         const{ title,tags} = request.query
         const user_id = request.user.id
         let movies_notes;
-        console.log(tags)
         if(tags){
             const filterTags = tags.split(",").map(tag =>tag.trim())
             console.log(filterTags)
