@@ -34,7 +34,8 @@ class UserController{
 
     async update(request, response){
         const { name, email, password, old_password} = request.body;
-        const{id}= request.params
+        console.log(request.user)
+        const id = request.user.id;
         //Validar dados recebidos
         if( !old_password){ 
             throw new AppError("Devem ser informado a sua senha do usuário")
@@ -66,10 +67,10 @@ class UserController{
             const newPassword = await hash(password, 8)
             await knex("users").update({password: newPassword}).where({id:user.id})
         }
-        email ?? user.email
-        name ?? user.name
-        await knex("users").update({email}).where({id:user.id})
-        await knex("users").update({name}).where({id:user.id})
+        const udpatedMail = (email !== "" && email !== null && email !== undefined) ? email : user.email
+        const udpatedName = (name !== "" && name !== null && name !== undefined) ? name : user.name
+        await knex("users").update({email:udpatedMail}).where({id:user.id})
+        await knex("users").update({name:udpatedName}).where({id:user.id})
         await knex("users").update({updated_at : knex.fn.now()}).where({id:user.id})
         return response.json()
     }

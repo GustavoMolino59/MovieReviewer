@@ -3,10 +3,9 @@ const AppError = require("../utils/AppError")
 class MoviesController{
     async create(request, response){
         const {title, description, tags,  rating} = request.body;
-        console.log(request.params)
-        const{user_id} = request.params
+        const user_id = request.user.id
 
-        console.log(user_id)
+        
         if(rating < 0 || rating > 5){
             throw new AppError("Tag fora do padrão")
         }
@@ -44,22 +43,22 @@ class MoviesController{
         return response.json()
     }
     async index(request,response){
-        const{user_id, title,tags} = request.query
-        
+        const{ title,tags} = request.query
+        const user_id = request.user.id
         let movies_notes;
-
+        console.log(tags)
         if(tags){
             const filterTags = tags.split(",").map(tag =>tag.trim())
-            
+            console.log(filterTags)
             movies_notes = await knex("movies_tags")
             .select(["movies_notes.id", "movies_notes.title", "movies_notes.description", "movies_notes.rating", "movies_notes.user_id"])
             .where("movies_notes.user_id", user_id)
             .whereLike("movies_notes.title", `%${title}%`)
-            .whereIn("movies_tags.title", filterTags)
+            .whereIn("movies_tags.title", filterTags )
             .innerJoin("movies_notes", "movies_notes.id", "movies_tags.note_id")
             .orderBy("movies_tags.title")
         }else{
-            movies_notes = await knex("movies_notes").where({user_id}).whereLike("title", `%${title}%`).orderBy("title")
+            movies_notes = await knex("movies_notes").where({user_id}).whereLike("title", `%${title}%`).orderBy("created_at", 'desc')
         }
         
         const userTags = await knex("movies_tags").where({user_id});
@@ -70,7 +69,7 @@ class MoviesController{
                 tags: noteTags
             }
         })
-        return response.json({notesWithTags})
+        return response.json(notesWithTags)
     }
 }
 
